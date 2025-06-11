@@ -5,24 +5,67 @@ A comprehensive financial management system API that provides endpoints for mana
 ## Base URL
 
 ```
-http://localhost:5000/api
+https://api.cashlyzer.com
 ```
 
-## Authentication
+## Project Structure
 
-All endpoints require authentication using a Bearer token. Include the token in the Authorization header:
+```
+├── app.js                 # Main application entry point
+├── config/               # Configuration files
+├── constants/           # Application constants
+├── controllers/         # Route controllers
+├── cron/               # Scheduled tasks
+├── middlewares/        # Custom middleware functions
+├── ml/                 # Machine learning models
+├── routes/             # API route definitions
+├── services/           # Business logic services
+└── utils/              # Utility functions
+```
+
+## Technologies Used
+
+- Node.js & Express.js
+- Firebase Admin SDK
+- Google Generative AI
+- Cohere AI
+- Node-cron for scheduling
+- Nodemailer for email notifications
+- ML Regression for predictions
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up environment variables in `.env` file
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+5. For production:
+   ```bash
+   npm start
+   ```
+
+## API Documentation
+
+### Authentication
+
+All endpoints except those under `/api/auth` require authentication using a Bearer token. Include the token in the Authorization header:
 
 ```
 Authorization: Bearer <your_token>
 ```
 
-## API Endpoints
+#### Authentication Endpoints
 
-### Authentication
-
-#### Register User
-- **POST** `http://localhost:5000/api/auth/register`
-- **Body:**
+##### Register User
+- **POST** `/api/auth/signup`
+- **Description:** Create a new user account
+- **Request Body:**
   ```json
   {
     "email": "user@example.com",
@@ -30,64 +73,79 @@ Authorization: Bearer <your_token>
     "name": "John Doe"
   }
   ```
-- **Response:** User data and authentication token
+- **Response:** `200 OK`
+  ```json
+  {
+    "message": "User registered successfully",
+    "user": {
+      "id": "user_id",
+      "email": "user@example.com",
+      "name": "John Doe"
+    },
+    "token": "jwt_token"
+  }
+  ```
 
-#### Login User
-- **POST** `http://localhost:5000/api/auth/login`
-- **Body:**
+##### Login
+- **POST** `/api/auth/login`
+- **Description:** Authenticate user and get access token
+- **Request Body:**
   ```json
   {
     "email": "user@example.com",
     "password": "your_password"
   }
   ```
-- **Response:** User data and authentication token
-
-### AI Insights
-
-#### Get Financial Insights
-- **GET** `http://localhost:5000/api/ai/insights`
-- **Headers:**
-  ```
-  Authorization: Bearer <your_token>
-  ```
-- **Response:**
+- **Response:** `200 OK`
   ```json
   {
-    "message": "Financial insights generated successfully",
-    "insights": {
-      "spendingPatterns": {
-        "category1": "percentage",
-        "category2": "percentage"
-      },
-      "trends": {
-        "category1": "trend_percentage",
-        "category2": "trend_percentage"
-      },
-      "recommendations": {
-        "category1": {
-          "recommended": "amount",
-          "current": "amount",
-          "trend": "percentage",
-          "percentage": "percentage"
-        }
-      },
-      "summary": {
-        "totalExpenses": "amount",
-        "totalIncome": "amount",
-        "savingsRate": "percentage",
-        "monthlyBudget": "amount"
-      }
-    }
+    "message": "Login successful",
+    "user": {
+      "id": "user_id",
+      "email": "user@example.com",
+      "name": "John Doe"
+    },
+    "token": "jwt_token"
   }
   ```
-- **Description:** Provides AI-powered insights about spending patterns, trends, and recommendations based on the last 3 months of financial data.
+
+##### Forgot Password
+- **POST** `/api/auth/forgot-password`
+- **Description:** Request password reset
+- **Request Body:**
+  ```json
+  {
+    "email": "user@example.com"
+  }
+  ```
+- **Response:** `200 OK`
+  ```json
+  {
+    "message": "Password reset email sent"
+  }
+  ```
+
+##### Get Profile
+- **GET** `/api/auth/profile`
+- **Description:** Get authenticated user's profile
+- **Headers:** Requires authentication
+- **Response:** `200 OK`
+  ```json
+  {
+    "id": "user_id",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "createdAt": "2024-03-20T00:00:00.000Z"
+  }
+  ```
 
 ### Expenses
 
 #### Add Expense
-- **POST** `http://localhost:5000/api/expenses`
-- **Body:**
+- **POST** `/api/expenses`
+- **Description:** Add a new expense
+- **Headers:** Requires authentication
+- **Request Body:**
   ```json
   {
     "amount": 50.00,
@@ -97,24 +155,67 @@ Authorization: Bearer <your_token>
     "date": "2024-03-20"
   }
   ```
-- **Response:** Created expense ID and success message
+- **Response:** `201 Created`
+  ```json
+  {
+    "message": "Expense added successfully",
+    "expense": {
+      "id": "expense_id",
+      "amount": 50.00,
+      "category": "FOOD",
+      "subcategory": "GROCERIES",
+      "note": "Weekly groceries",
+      "date": "2024-03-20",
+      "userId": "user_id"
+    }
+  }
+  ```
 
 #### Get Expenses
-- **GET** `http://localhost:5000/api/expenses`
+- **GET** `/api/expenses`
+- **Description:** Get all expenses with optional date filtering
+- **Headers:** Requires authentication
 - **Query Parameters:**
-  - `startDate`: Start date (YYYY-MM-DD)
-  - `endDate`: End date (YYYY-MM-DD)
-- **Response:** List of expenses with details
+  - `startDate` (optional): Start date in YYYY-MM-DD format
+  - `endDate` (optional): End date in YYYY-MM-DD format
+- **Response:** `200 OK`
+  ```json
+  {
+    "expenses": [
+      {
+        "id": "expense_id",
+        "amount": 50.00,
+        "category": "FOOD",
+        "subcategory": "GROCERIES",
+        "note": "Weekly groceries",
+        "date": "2024-03-20",
+        "userId": "user_id"
+      }
+    ],
+    "total": 1,
+    "totalAmount": 50.00
+  }
+  ```
 
 #### Delete Expense
-- **DELETE** `http://localhost:5000/api/expenses/:id`
-- **Response:** Success message and deleted expense ID
+- **DELETE** `/api/expenses/:id`
+- **Description:** Delete an expense by ID
+- **Headers:** Requires authentication
+- **Response:** `200 OK`
+  ```json
+  {
+    "message": "Expense deleted successfully",
+    "id": "expense_id"
+  }
+  ```
 
 ### Income
 
 #### Add Income
-- **POST** `http://localhost:5000/api/incomes`
-- **Body:**
+- **POST** `/api/incomes`
+- **Description:** Add a new income entry
+- **Headers:** Requires authentication
+- **Request Body:**
   ```json
   {
     "amount": 3000.00,
@@ -123,53 +224,123 @@ Authorization: Bearer <your_token>
     "date": "2024-03-01"
   }
   ```
-- **Response:** Created income ID and success message
+- **Response:** `201 Created`
+  ```json
+  {
+    "message": "Income added successfully",
+    "income": {
+      "id": "income_id",
+      "amount": 3000.00,
+      "source": "Salary",
+      "note": "Monthly salary",
+      "date": "2024-03-01",
+      "userId": "user_id"
+    }
+  }
+  ```
 
 #### Get Incomes
-- **GET** `http://localhost:5000/api/incomes`
+- **GET** `/api/incomes`
+- **Description:** Get all income entries with optional date filtering
+- **Headers:** Requires authentication
 - **Query Parameters:**
-  - `startDate`: Start date (YYYY-MM-DD)
-  - `endDate`: End date (YYYY-MM-DD)
-- **Response:** List of incomes with details
-
-#### Delete Income
-- **DELETE** `http://localhost:5000/api/incomes/:id`
-- **Response:** Success message and deleted income ID
+  - `startDate` (optional): Start date in YYYY-MM-DD format
+  - `endDate` (optional): End date in YYYY-MM-DD format
+- **Response:** `200 OK`
+  ```json
+  {
+    "incomes": [
+      {
+        "id": "income_id",
+        "amount": 3000.00,
+        "source": "Salary",
+        "note": "Monthly salary",
+        "date": "2024-03-01",
+        "userId": "user_id"
+      }
+    ],
+    "total": 1,
+    "totalAmount": 3000.00
+  }
+  ```
 
 ### Budget Management
 
 #### Set Monthly Budget
-- **POST** `http://localhost:5000/api/budget`
-- **Body:**
+- **POST** `/api/budget`
+- **Description:** Set or update monthly budget
+- **Headers:** Requires authentication
+- **Request Body:**
   ```json
   {
     "amount": 2000.00
   }
   ```
-- **Response:** Updated budget amount
+- **Response:** `200 OK`
+  ```json
+  {
+    "message": "Budget updated successfully",
+    "budget": {
+      "amount": 2000.00,
+      "month": "2024-03",
+      "userId": "user_id"
+    }
+  }
+  ```
 
 #### Get Budget
-- **GET** `http://localhost:5000/api/budget`
-- **Response:** Current monthly budget
+- **GET** `/api/budget`
+- **Description:** Get current monthly budget
+- **Headers:** Requires authentication
+- **Response:** `200 OK`
+  ```json
+  {
+    "budget": {
+      "amount": 2000.00,
+      "month": "2024-03",
+      "userId": "user_id"
+    }
+  }
+  ```
 
-### Categories
+### AI Features
 
-#### Get All Categories
-- **GET** `http://localhost:5000/api/categories`
-- **Response:** List of all expense categories and subcategories
-
-#### Validate Category
-- **GET** `http://localhost:5000/api/categories/validate`
-- **Query Parameters:**
-  - `category`: Category to validate
-  - `subcategory`: Subcategory to validate (optional)
-- **Response:** Validation result
+#### Get Financial Insights
+- **GET** `/api/ai/insights`
+- **Description:** Get AI-powered financial insights
+- **Headers:** Requires authentication
+- **Response:** `200 OK`
+  ```json
+  {
+    "insights": {
+      "spendingPatterns": {
+        "FOOD": 30,
+        "TRANSPORT": 20,
+        "ENTERTAINMENT": 15
+      },
+      "trends": {
+        "FOOD": 5,
+        "TRANSPORT": -2,
+        "ENTERTAINMENT": 10
+      },
+      "recommendations": [
+        {
+          "category": "FOOD",
+          "suggestion": "Consider reducing food expenses by 20%",
+          "potentialSavings": 100.00
+        }
+      ]
+    }
+  }
+  ```
 
 ### Dashboard Summary
 
 #### Get Dashboard Summary
-- **GET** `http://localhost:5000/api/summary/dashboard`
-- **Response:**
+- **GET** `/api/summary/dashboard`
+- **Description:** Get comprehensive financial summary
+- **Headers:** Requires authentication
+- **Response:** `200 OK`
   ```json
   {
     "monthlyIncome": 3000.00,
@@ -180,98 +351,61 @@ Authorization: Bearer <your_token>
     "topCategories": [
       {
         "category": "FOOD",
-        "name": "Food & Dining",
         "amount": 500.00,
-        "count": 10
-      }
-    ],
-    "categoryBreakdown": [
-      {
-        "category": "FOOD",
-        "name": "Food & Dining",
-        "amount": 500.00,
-        "count": 10,
         "percentage": 33.33
       }
-    ]
-  }
-  ```
-
-### AI Features
-
-#### Get Budget Recommendations
-- **GET** `http://localhost:5000/api/ai/budget-recommendation`
-- **Response:**
-  ```json
-  {
-    "monthlyBudget": 2000.00,
-    "categoryBudgets": {
-      "FOOD": {
-        "name": "Food & Dining",
-        "recommended": 400.00,
-        "current": 500.00
-      }
-    },
-    "recommendations": [
-      {
-        "category": "FOOD",
-        "name": "Food & Dining",
-        "suggestion": "Consider reducing food expenses by 20%"
-      }
     ],
-    "insights": [
-      "Your food expenses are 25% higher than average"
-    ],
-    "historicalData": {
-      "lastThreeMonths": [
-        {
-          "month": "2024-02",
-          "totalExpenses": 1800.00
-        }
-      ]
+    "savingsRate": 50.00,
+    "monthlyTrend": {
+      "income": 5.00,
+      "expenses": -2.00
     }
   }
   ```
 
-### Notifications
+### Error Responses
 
-#### Get Notifications
-- **GET** `http://localhost:5000/api/notifications`
-- **Query Parameters:**
-  - `limit`: Number of notifications to return (default: 10)
-  - `unreadOnly`: Return only unread notifications (default: false)
-- **Response:** List of notifications
+All endpoints may return the following error responses:
 
-#### Mark Notification as Read
-- **PUT** `http://localhost:5000/api/notifications/:id/read`
-- **Response:** Success message
-
-#### Mark All Notifications as Read
-- **PUT** `http://localhost:5000/api/notifications/read-all`
-- **Response:** Success message
-
-#### Delete Old Notifications
-- **DELETE** `http://localhost:5000/api/notifications/old`
-- **Response:** Number of deleted notifications
-
-## Error Responses
-
-All endpoints return errors in the following format:
-
+#### 400 Bad Request
 ```json
 {
-  "error": "Error type",
-  "message": "Detailed error message"
+  "error": "Bad Request",
+  "message": "Invalid request parameters"
 }
 ```
 
-Common HTTP status codes:
-- 200: Success
-- 201: Created
-- 400: Bad Request
-- 401: Unauthorized
-- 404: Not Found
-- 500: Internal Server Error
+#### 401 Unauthorized
+```json
+{
+  "error": "Unauthorized",
+  "message": "Authentication required"
+}
+```
+
+#### 403 Forbidden
+```json
+{
+  "error": "Forbidden",
+  "message": "Insufficient permissions"
+}
+```
+
+#### 404 Not Found
+```json
+{
+  "error": "Not Found",
+  "message": "Resource not found"
+}
+```
+
+#### 500 Internal Server Error
+```json
+{
+  "error": "Internal Server Error",
+  "message": "Something went wrong"
+}
+```
 
 ## Data Models
 
