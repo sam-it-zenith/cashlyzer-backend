@@ -38,7 +38,17 @@ app.use('/api/savings', savingsRoutes);
 app.use('/api/profile', profileRoutes);
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to Cashlyzer Backend API' });
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Cashlyzer Backend API</title>
+      </head>
+      <body>
+        <h1 style="color: red;">Welcome to Cashlyzer Backend API</h1>
+      </body>
+    </html>
+  `);
 });
 
 // Error handling middleware

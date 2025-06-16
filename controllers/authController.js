@@ -27,7 +27,13 @@ exports.signup = async (req, res) => {
       email,
       name
     });
-    const token = await admin.auth().createCustomToken(userRecord.uid);
+
+    // Generate custom token with 30 days expiration (in seconds)
+    const thirtyDaysInSeconds = 30 * 24 * 60 * 60; // 30 days in seconds
+    const token = await admin.auth().createCustomToken(userRecord.uid, {
+      expiresIn: thirtyDaysInSeconds
+    });
+
     res.status(201).json({
       message: 'User created successfully',
       user: {
@@ -74,8 +80,11 @@ exports.login = async (req, res) => {
     // Get user data from Firestore
     const userData = await firebaseService.getUserByUid(userRecord.uid);
 
-    // Generate custom token
-    const token = await admin.auth().createCustomToken(userRecord.uid);
+    // Generate custom token with 30 days expiration (in seconds)
+    const thirtyDaysInSeconds = 30 * 24 * 60 * 60; // 30 days in seconds
+    const token = await admin.auth().createCustomToken(userRecord.uid, {
+      expiresIn: thirtyDaysInSeconds
+    });
 
     res.json({
       message: 'Login successful',

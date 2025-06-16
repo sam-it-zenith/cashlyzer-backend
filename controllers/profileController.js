@@ -43,7 +43,7 @@ const updateUserProfile = async (req, res) => {
 
     // Allowed fields for update
     const allowedFields = [
-      'displayName',
+      'name',
       'email',
       'phoneNumber',
       'currency',

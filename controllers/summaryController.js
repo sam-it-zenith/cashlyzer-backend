@@ -17,15 +17,7 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USERNAME,
     pass: process.env.EMAIL_PASSWORD
-  },
-  tls: {
-    rejectUnauthorized: false
-  },
-  pool: true, // use pooled connections
-  maxConnections: 1,
-  maxMessages: 3,
-  rateDelta: 1000, // 1 second
-  rateLimit: 1 // 1 message per second
+  }
 });
 
 // Verify transporter configuration
